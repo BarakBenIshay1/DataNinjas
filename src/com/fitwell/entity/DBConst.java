@@ -7,6 +7,8 @@ import java.nio.charset.StandardCharsets;
 
 public final class DBConst {
     private DBConst() { throw new AssertionError(); }
+    
+    public static final String DB_DRIVER = "net.ucanaccess.jdbc.UcanaccessDriver";
 
     private static final String DB_NAME = "FitWellDB.accdb";
     protected static final String DB_FILEPATH = getDBPath();
