@@ -1,15 +1,32 @@
-package com.fitwell.boundary;
+package com.fitwell.boundary.login;
 
-import com.fitwell.control.ManagerController;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GradientPaint;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GridBagLayout;
+import java.awt.RenderingHints;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
+
+import com.fitwell.boundary.ManagerDashboardUI;
+import com.fitwell.boundary.UIBuilder;
+import com.fitwell.control.ManagerController;
 
 public class ManagerLoginUI extends JFrame {
 
@@ -34,11 +51,6 @@ public class ManagerLoginUI extends JFrame {
                 new LineBorder(new Color(220, 220, 220), 1),
                 new EmptyBorder(40, 50, 40, 50)
         ));
-
-        // Icon and Title
-        JLabel icon = UIBuilder.LabelBuilder.of("👔").horizontalAlignment(SwingConstants.CENTER)
-        	.font(new Font("Segoe UI Emoji", Font.PLAIN, 40)).build();
-        icon.setAlignmentX(Component.CENTER_ALIGNMENT);
         
         JLabel title = UIBuilder.LabelBuilder.of("Institute Manager").font(new Font("Segoe UI", Font.BOLD, 24))
         		.foreground(new Color(30, 55, 100)).build();
@@ -75,9 +87,6 @@ public class ManagerLoginUI extends JFrame {
             dispose();
         });
 
-        // Add to card
-        card.add(icon);
-        card.add(Box.createVerticalStrut(10));
         card.add(title);
         card.add(Box.createVerticalStrut(30));
         card.add(lblId);

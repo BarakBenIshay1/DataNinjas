@@ -1,15 +1,33 @@
-package com.fitwell.boundary;
+package com.fitwell.boundary.login;
 
-import javax.swing.*;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GradientPaint;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GridLayout;
+import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+
+import com.fitwell.boundary.UIBuilder;
 
 public class RoleSelectionUI extends JFrame {
 
     public RoleSelectionUI() {
 
-        setTitle("FitWell – Role Selection");
+        setTitle("FitWell - Role Selection");
 
         setSize(520, 600); 
         setLocationRelativeTo(null);
@@ -18,15 +36,11 @@ public class RoleSelectionUI extends JFrame {
         setContentPane(new AppBackgroundPanel());
         setLayout(new BorderLayout());
 
-        // ===== HEADER =====
         JLabel title = new JLabel("FITWELL", SwingConstants.CENTER);
         title.setFont(new Font("Segoe UI", Font.BOLD, 36));
         title.setForeground(new Color(30, 55, 100));
 
-        JLabel subtitle = new JLabel(
-                "Choose your role to continue",
-                SwingConstants.CENTER
-        );
+        JLabel subtitle = new JLabel("Choose your role to continue",SwingConstants.CENTER);
         subtitle.setFont(new Font("Segoe UI", Font.PLAIN, 15));
         subtitle.setForeground(new Color(80, 80, 80));
         
@@ -34,12 +48,10 @@ public class RoleSelectionUI extends JFrame {
         	.border(BorderFactory.createEmptyBorder(30, 10, 20, 10)).opaque(false)
         	.add(title).add(subtitle).build();
 
-        // roles
-        JButton btnConsultant = createRoleButton("🧑‍🏫","Fitness Consultant","");
-        JButton btnTrainee = createRoleButton("🏃","Trainee","");
-        JButton btnManager = createRoleButton("👔","Manager","");
+        JButton btnConsultant = createRoleButton("Fitness Consultant");
+        JButton btnTrainee = createRoleButton("Trainee");
+        JButton btnManager = createRoleButton("Manager");
 
-        // actions
         btnConsultant.addActionListener(e -> {
             new ConsultantLoginUI().setVisible(true);
             dispose();
@@ -70,36 +82,17 @@ public class RoleSelectionUI extends JFrame {
     }
 
     // button factory
-    private JButton createRoleButton(String emoji,String title,String subtitle) {
-    	String html = "<html><center style='font-family:Segoe UI'>"
-                        + "<div style='font-size:34px; margin-bottom:6px'>" + emoji + "</div>"
-                        + "<b style='font-size:15px'>" + title + "</b><br>"
-                        + "<span style='font-size:12px;color:#555'>" + subtitle + "</span>"
-                        + "</center></html>";
-
-    	JButton btn = UIBuilder.ButtonBuilder.of(html)
+    private JButton createRoleButton(String title) {
+    	JButton btn = UIBuilder.ButtonBuilder.of(title)
     			.preferredSize(new Dimension(360, 110)).background(new Color(235, 242, 255))
     			.focus(false).opaque(true).border(BorderFactory.createEmptyBorder(18, 10, 18, 10))
+    			.font(new Font("Segoe UI Emoji", Font.BOLD, 24))
     			.build();
         
         btn.setMaximumSize(new Dimension(360, 110));
-
-        btn.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseEntered(MouseEvent e) {
-                btn.setBackground(new Color(220, 232, 250));
-            }
-
-            @Override
-            public void mouseExited(MouseEvent e) {
-                btn.setBackground(new Color(235, 242, 255));
-            }
-        });
-
         return btn;
     }
 
-    // ===== APP BACKGROUND =====
     private static class AppBackgroundPanel extends JPanel {
         @Override
         protected void paintComponent(Graphics g) {

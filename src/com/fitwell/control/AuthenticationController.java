@@ -20,9 +20,8 @@ public class AuthenticationController {
     }
     
     public boolean traineeExists(int traineeId) {
-        return exists(
-            "SELECT COUNT(*) FROM Trainee WHERE traineeId = ? AND isActive = TRUE",
-            traineeId
+        String sql = "SELECT (*) FROM Trainee WHERE traineeID = ? AND isActive = true";
+        return exists(sql,traineeId
         );
     }
     private boolean exists(String sql, int id) {
@@ -41,13 +40,11 @@ public class AuthenticationController {
         }
     }
     public boolean consultantExists(int consultantId) {
-        return exists(
-            "SELECT COUNT(*) FROM FitnessConsultant WHERE consultantId = ?",
-            consultantId
-        );
+        String sql = "SELECT COUNT(*) FROM FitnessConsultant WHERE consultantID = ?";
+        return exists(sql,consultantId);
     }
     public String getConsultantFirstName(int consultantId) {
-        String sql = "SELECT firstName FROM FitnessConsultant WHERE consultantId = ?";
+        String sql = "SELECT Name FROM FitnessConsultant WHERE consultantID = ?";
         try (
             Connection conn = DriverManager.getConnection(DBConst.CONN_STR);
             PreparedStatement ps = conn.prepareStatement(sql)

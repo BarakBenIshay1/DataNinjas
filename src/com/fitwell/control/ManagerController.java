@@ -18,7 +18,7 @@ public class ManagerController {
     }
 
     public boolean isManagerExists(int managerId) {
-        String sql = "SELECT consultantId FROM StudioManager WHERE consultantId = ?";
+        String sql = "SELECT managerID FROM StudioManager WHERE managerID = ?";
         try {
             Class.forName(DBConst.DB_DRIVER);
             try (Connection conn = DriverManager.getConnection(DBConst.CONN_STR);
@@ -233,7 +233,7 @@ public class ManagerController {
 
     // --- עדכון פרטי מתאמן במסד (כולל סטטוס פעילות isActive) ---
     public boolean updateTraineeDetails(int id, String fName, String lName, String email, String phone, java.sql.Date birthDate, String updateMethod, boolean isActive) {
-        java.sql.Date cleanBirthDate = getCleanDate(birthDate);
+        java.sql.Date BirthDateMidnight = getCleanDate(birthDate);
         String sql = "UPDATE Trainee SET firstName = ?, lastName = ?, email = ?, phoneNumber = ?, birthDat = ?, preferredUpdateMethod = ?, isActive = ? WHERE traineeId = ?";
         
         try {
@@ -244,7 +244,7 @@ public class ManagerController {
                 ps.setString(2, lName);
                 ps.setString(3, email); 
                 ps.setString(4, phone);
-                ps.setDate(5, cleanBirthDate); 
+                ps.setDate(5, BirthDateMidnight); 
                 ps.setString(6, updateMethod);
                 ps.setBoolean(7, isActive); 
                 ps.setInt(8, id);
