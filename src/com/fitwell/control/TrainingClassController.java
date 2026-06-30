@@ -22,8 +22,11 @@ import com.fitwell.entity.Tip;
 public class TrainingClassController {
 
 	private static TrainingClassController instance;
+	private Map<Integer, ClassType> classTypeMap;
 
 	private TrainingClassController() {
+		classTypeMap = new HashMap<>();
+		loadClassTypeList();
 	}
 
 	public static TrainingClassController getInstance() {
@@ -33,7 +36,14 @@ public class TrainingClassController {
 	}
 
 	public List<ClassType> getClassTypeList() {
-		List<ClassType> list = new ArrayList<>();
+		return new ArrayList<>(classTypeMap.values());
+	}
+	public ClassType getClassTypeById(int id){
+		return classTypeMap.get(id);
+	}
+
+	private void loadClassTypeList() {
+
 		try {
 			loadDriver();
 			String sql = "SELECT ClassTypeId, Name FROM ClassType";
@@ -44,14 +54,15 @@ public class TrainingClassController {
 				while (rs.next()) {
 					int classTypeId = rs.getInt(1);
 					String name = rs.getString(2);
-					list.add(new ClassType(classTypeId, name));
+
+					ClassType ct = new ClassType(classTypeId, name);
+					classTypeMap.put(ct.getClassTypeId(), ct);
 				}
 
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		return list;
 	}
 
 	private void loadDriver() throws ClassNotFoundException {
@@ -179,7 +190,7 @@ public class TrainingClassController {
 
 		String sqlUsed = "SELECT SUM(cea.requestedQuantity) AS usedQty " + "FROM ClassEquipmentAssignment cea "
 				+ "INNER JOIN TrainingClass tc ON cea.classID = tc.classId " + "WHERE cea.typeID = ? "
-				+ "AND tc.status <> 'Cancelled' " + "AND (tc.startTime > ? OR tc.endTime < ?)";
+				+ "AND tc.status <> 'Cancelled' " + "AND (tc.startDateTime > ? OR tc.endDateTime < ?)";
 
 		try (Connection conn = DriverManager.getConnection(CONN_STR)) {
 			int totalFunctional = 0;
@@ -216,14 +227,14 @@ public class TrainingClassController {
 	// HELPER METHODS
 	// ==============================
 
-	public List<String[]> getAllEquipmentTypes() {
-		List<String[]> types = new ArrayList<>();
-		String sql = "SELECT typeID, name FROM EquipmentType";
+	public List<EquipmentTypeView> getAllEquipmentTypes() {
+		List<EquipmentTypeView> types = new ArrayList<>();
+		String sql = "SELECT equipmentTypeID, name FROM EquipmentType";
 		try (Connection conn = DriverManager.getConnection(CONN_STR);
 				Statement stmt = conn.createStatement();
 				ResultSet rs = stmt.executeQuery(sql)) {
 			while (rs.next()) {
-				types.add(new String[] { String.valueOf(rs.getInt("typeID")), rs.getString("name") });
+				types.add(new EquipmentTypeView(rs.getInt("equipmentTypeID"), rs.getString("name")));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -287,13 +298,13 @@ public class TrainingClassController {
 
 	public List<Object[]> getAllTrainingClasses() {
 		List<Object[]> rows = new ArrayList<>();
-		String sql = "SELECT classId, nameclass, startTime, endTime, type, maxParticipants, status FROM TrainingClass";
+		String sql = "SELECT classId, name, startDateTime, endDateTime, classTypeId, maxParticipants, status FROM TrainingClass";
 		try (Connection conn = DriverManager.getConnection(CONN_STR);
 				Statement st = conn.createStatement();
 				ResultSet rs = st.executeQuery(sql)) {
 			while (rs.next()) {
-				rows.add(new Object[] { rs.getString("classId"), rs.getString("nameclass"),
-						rs.getTimestamp("startTime"), rs.getTimestamp("endTime"), rs.getString("type"),
+				rows.add(new Object[] { rs.getString("classId"), rs.getString("name"),
+						rs.getTimestamp("startDateTime"), rs.getTimestamp("endDateTime"), rs.getInt("classTypeId"),
 						rs.getInt("maxParticipants"), rs.getString("status") });
 			}
 		} catch (SQLException e) {
@@ -349,7 +360,7 @@ public class TrainingClassController {
 		isEmergencyActive = false;
 		emergencyTargetTime = null;
 
-		String sql = "UPDATE TrainingClass SET status = IIF(NOW() < startTime, 'Active', 'InSession') WHERE status = 'Paused' AND NOW() < endTime";
+		String sql = "UPDATE TrainingClass SET status = IIF(NOW() < startDateTime, 'Active', 'InSession') WHERE status = 'Paused' AND NOW() < endDateTime";
 		try (Connection conn = DriverManager.getConnection(DBConst.CONN_STR);
 				PreparedStatement ps = conn.prepareStatement(sql)) {
 			ps.executeUpdate();
@@ -369,11 +380,11 @@ public class TrainingClassController {
 	public List<Object[]> getAvailabilityReportForTime(LocalDateTime start, LocalDateTime end) {
 		List<Object[]> result = new ArrayList<>();
 
-		List<String[]> allTypes = getAllEquipmentTypes();
+		List<EquipmentTypeView> allTypes = getAllEquipmentTypes();
 
-		for (String[] type : allTypes) {
-			int typeId = Integer.parseInt(type[0]);
-			String name = type[1];
+		for (EquipmentTypeView type : allTypes) {
+			int typeId = type.getEquipmentTypeID();
+			String name = type.getName();
 
 			int available = getAvailableQuantity(typeId, start, end);
 
@@ -390,7 +401,7 @@ public class TrainingClassController {
 
 		String sqlUsed = "SELECT SUM(cea.requestedQuantity) AS usedQty " + "FROM ClassEquipmentAssignment cea "
 				+ "INNER JOIN TrainingClass tc ON cea.classID = tc.classId " + "WHERE cea.typeID = ? "
-				+ "AND tc.status <> 'Cancelled' " + "AND (tc.startTime < ? AND tc.endTime > ?)";
+				+ "AND tc.status <> 'Cancelled' " + "AND (tc.startDateTime < ? AND tc.endDateTime > ?)";
 
 		try (Connection conn = DriverManager.getConnection(DBConst.CONN_STR)) {
 			int total = 0;
@@ -439,7 +450,7 @@ public class TrainingClassController {
 			throw new RuntimeException(validationError);
 		}
 
-		String sql = "UPDATE TrainingClass SET startTime = ?, endTime = ? WHERE classId = ?";
+		String sql = "UPDATE TrainingClass SET startDateTime = ?, endDateTime = ? WHERE classId = ?";
 		try (Connection conn = DriverManager.getConnection(DBConst.CONN_STR);
 				PreparedStatement ps = conn.prepareStatement(sql)) {
 			ps.setTimestamp(1, Timestamp.valueOf(newStart));
@@ -474,12 +485,12 @@ public class TrainingClassController {
 
 	public int getAvailableQuantityExcludingClass(int typeId, LocalDateTime start, LocalDateTime end,
 			int excludeClassId) {
-		String sqlTotal = "SELECT COUNT(*) AS total FROM EquipmentItem WHERE typeID = ? AND isFunctional = TRUE";
+		String sqlTotal = "SELECT COUNT(*) AS total FROM EquipmentItem WHERE equipmentTypeID = ? AND isFunctional = TRUE";
 
 		String sqlUsed = "SELECT SUM(cea.requestedQuantity) AS usedQty " + "FROM ClassEquipmentAssignment cea "
-				+ "INNER JOIN TrainingClass tc ON cea.classID = tc.classId " + "WHERE cea.typeID = ? "
+				+ "INNER JOIN TrainingClass tc ON cea.classID = tc.classId " + "WHERE cea.equipmentTypeID = ? "
 				+ "AND tc.status <> 'Cancelled' " + "AND tc.classId <> ? "
-				+ "AND (tc.startTime < ? AND tc.endTime > ?)";
+				+ "AND (tc.startDateTime < ? AND tc.endDateTime > ?)";
 
 		try (Connection conn = DriverManager.getConnection(DBConst.CONN_STR)) {
 			int total = 0;
@@ -509,13 +520,13 @@ public class TrainingClassController {
 
 	public Map<Integer, Integer> getClassEquipment(int classId) {
 		Map<Integer, Integer> map = new HashMap<>();
-		String sql = "SELECT typeID, requestedQuantity FROM ClassEquipmentAssignment WHERE classID = ?";
+		String sql = "SELECT equipmentTypeID, requestedQuantity FROM ClassEquipmentAssignment WHERE classID = ?";
 		try (Connection conn = DriverManager.getConnection(DBConst.CONN_STR);
 				PreparedStatement ps = conn.prepareStatement(sql)) {
 			ps.setInt(1, classId);
 			ResultSet rs = ps.executeQuery();
 			while (rs.next()) {
-				map.put(rs.getInt("typeID"), rs.getInt("requestedQuantity"));
+				map.put(rs.getInt("equipmentTypeID"), rs.getInt("requestedQuantity"));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -548,7 +559,7 @@ public class TrainingClassController {
 	}
 
 	public boolean updateClassDetails(int classId, String newName, LocalDateTime newStart, LocalDateTime newEnd,
-			String newType, int newMax, Map<Integer, Integer> newEquipment) {
+			int newType, int newMax, Map<Integer, Integer> newEquipment) {
 		for (Map.Entry<Integer, Integer> entry : newEquipment.entrySet()) {
 			int typeId = entry.getKey();
 			int qty = entry.getValue();
@@ -559,7 +570,7 @@ public class TrainingClassController {
 			}
 		}
 
-		String sqlClass = "UPDATE TrainingClass SET nameclass=?, startTime=?, endTime=?, type=?, maxParticipants=? WHERE classId=?";
+		String sqlClass = "UPDATE TrainingClass SET name=?, startDateTime=?, endDateTime=?, classTypeId=?, maxParticipants=? WHERE classId=?";
 		try (Connection conn = DriverManager.getConnection(DBConst.CONN_STR)) {
 			conn.setAutoCommit(false);
 
@@ -567,7 +578,7 @@ public class TrainingClassController {
 				ps.setString(1, newName);
 				ps.setTimestamp(2, Timestamp.valueOf(newStart));
 				ps.setTimestamp(3, Timestamp.valueOf(newEnd));
-				ps.setString(4, newType);
+				ps.setInt(4, newType);
 				ps.setInt(5, newMax);
 				ps.setInt(6, classId);
 				ps.executeUpdate();
@@ -580,7 +591,7 @@ public class TrainingClassController {
 			}
 
 			if (newEquipment != null && !newEquipment.isEmpty()) {
-				String insSql = "INSERT INTO ClassEquipmentAssignment (classID, typeID, requestedQuantity) VALUES (?, ?, ?)";
+				String insSql = "INSERT INTO ClassEquipmentAssignment (classID, equipmentTypeID, requestedQuantity) VALUES (?, ?, ?)";
 				try (PreparedStatement psIns = conn.prepareStatement(insSql)) {
 					for (Map.Entry<Integer, Integer> entry : newEquipment.entrySet()) {
 						psIns.setInt(1, classId);
@@ -599,18 +610,19 @@ public class TrainingClassController {
 		}
 	}
 
-	public List<Object[]> getAvailabilityReportForTimeExcludingClass(LocalDateTime start, LocalDateTime end,
+	public List<EquipmentTypeView> getAvailabilityReportForTimeExcludingClass(LocalDateTime start, LocalDateTime end,
 			int excludeClassId) {
-		List<Object[]> result = new ArrayList<>();
-		List<String[]> allTypes = getAllEquipmentTypes();
+		List<EquipmentTypeView> result = new ArrayList<>();
+		List<EquipmentTypeView> allTypes = getAllEquipmentTypes();
 
-		for (String[] type : allTypes) {
-			int typeId = Integer.parseInt(type[0]);
-			String name = type[1];
+		for (EquipmentTypeView type : allTypes) {
+			int typeId = type.getEquipmentTypeID();
+			String name = type.getName();
 			int available = getAvailableQuantityExcludingClass(typeId, start, end, excludeClassId);
 			if (available < 0)
 				available = 0;
-			result.add(new Object[] { typeId, name, available });
+			
+			result.add(new EquipmentTypeView( typeId, name, available ));
 		}
 		return result;
 	}
@@ -673,6 +685,50 @@ public class TrainingClassController {
 		public String toString() {
 			return name;
 		}
+		public boolean equals(Object obj){
+			if(!(obj instanceof ClassType))return false;
+			return this.classTypeId == ((ClassType)obj).classTypeId;
+		}
+		public int hashCode(){
+			return this.classTypeId;
+		}
 	}
 
+	public static class EquipmentTypeView {
+		private int equipmentTypeID;
+		private String name;
+		private int available;
+
+		public EquipmentTypeView(int equipmentTypeID, String name) {
+			this(equipmentTypeID, name, 0);
+		}
+		public EquipmentTypeView(int equipmentTypeID, String name, int available) {
+			this.equipmentTypeID = equipmentTypeID;
+			this.name = name;
+			this.available = available;
+		}
+
+		public int getEquipmentTypeID() {
+			return equipmentTypeID;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public int getAvailable() {
+			return available;
+		}
+		
+	}
+
+	public static class TrainingClassView {
+		private int classId;
+		private String name;
+		private LocalDateTime startDateTime;
+		private LocalDateTime endDateTime;
+		private String classTypeId;
+		private int maxParticipants;
+		private String status;
+	}
 }
