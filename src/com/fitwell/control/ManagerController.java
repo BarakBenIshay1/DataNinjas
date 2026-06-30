@@ -1,7 +1,10 @@
 package com.fitwell.control;
 
 import com.fitwell.entity.DBConst;
+import com.fitwell.entity.Trainee;
+
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -9,12 +12,115 @@ import java.util.List;
 public class ManagerController {
 
     private static ManagerController instance;
+    private List<PairData> updateMethods;
+    private List<PairData> planStatusList;
 
-    private ManagerController() {}
+    public static final int PERSONAL_PLAN = -1;
+
+    private ManagerController() {
+        updateMethods = new ArrayList<>();
+        planStatusList = new ArrayList<>();
+        loadUpdateMethods();
+        loadPlanStatus();
+    }
 
     public static ManagerController getInstance() {
-        if (instance == null) instance = new ManagerController();
+        if (instance == null)
+            instance = new ManagerController();
         return instance;
+    }
+
+    private void loadUpdateMethods() {
+        String sql = "SELECT * FROM UpdateMethod";
+        try {
+            Class.forName(DBConst.DB_DRIVER);
+            try (Connection conn = DriverManager.getConnection(DBConst.CONN_STR);
+                    PreparedStatement ps = conn.prepareStatement(sql)) {
+
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        int id = rs.getInt(1);
+                        String name = rs.getString(2);
+                        PairData pairData = new PairData(id, name);
+                        updateMethods.add(pairData);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadPlanStatus() {
+        String sql = "SELECT * FROM PlanStatus";
+        try {
+            Class.forName(DBConst.DB_DRIVER);
+            try (Connection conn = DriverManager.getConnection(DBConst.CONN_STR);
+                    PreparedStatement ps = conn.prepareStatement(sql)) {
+
+                try (ResultSet rs = ps.executeQuery()) {
+                    while (rs.next()) {
+                        int id = rs.getInt(1);
+                        String name = rs.getString(2);
+                        PairData pairData = new PairData(id, name);
+                        planStatusList.add(pairData);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static class PairData {
+        private int id;
+        private String name;
+
+        public PairData(int id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String toString() {
+            return name;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o)
+                return true;
+            if (!(o instanceof PairData))
+                return false;
+            PairData other = (PairData) o;
+            return this.id == other.id;
+        }
+
+        @Override
+        public int hashCode() {
+            return Integer.hashCode(id);
+        }
+    }
+
+    public List<PairData> getUpdateMethods() {
+        return updateMethods;
+    }
+    public PairData getUpdateMethod(int id){
+        for(PairData pd : updateMethods){
+            if(pd.getId() == id) return pd;
+        }
+        return null;
+    }
+
+    public List<PairData> getPlanStatusList() {
+        return planStatusList;
     }
 
     public boolean isManagerExists(int managerId) {
@@ -22,7 +128,7 @@ public class ManagerController {
         try {
             Class.forName(DBConst.DB_DRIVER);
             try (Connection conn = DriverManager.getConnection(DBConst.CONN_STR);
-                 PreparedStatement ps = conn.prepareStatement(sql)) {
+                    PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setInt(1, managerId);
                 try (ResultSet rs = ps.executeQuery()) {
                     return rs.next();
@@ -34,18 +140,22 @@ public class ManagerController {
         }
     }
 
-    public List<String> getAllPlans() {
-        List<String> plans = new ArrayList<>();
+    public List<PairData> getAllPlans() {
+        List<PairData> plans = new ArrayList<>();
         try {
             Class.forName(DBConst.DB_DRIVER);
             try (Connection conn = DriverManager.getConnection(DBConst.CONN_STR)) {
                 try (Statement stmt = conn.createStatement();
-                     ResultSet rs = stmt.executeQuery("SELECT planID FROM GroupPlan")) {
-                    while (rs.next()) plans.add(rs.getString("planID") + " (Group)");
-                } catch (Exception e) {}
-                plans.add("Create New Personal Plan");
+                        ResultSet rs = stmt.executeQuery("SELECT planID, GeneralGuidelines FROM GroupFitnessPlan")) {
+                    while (rs.next())
+                        plans.add(new PairData(rs.getInt("planID"), rs.getString("GeneralGuidelines")));
+                } catch (Exception e) {
+                }
+                plans.add(new PairData(PERSONAL_PLAN, "Create New Personal Plan"));
             }
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return plans;
     }
 
@@ -55,21 +165,23 @@ public class ManagerController {
         try {
             Class.forName(DBConst.DB_DRIVER);
             try (Connection conn = DriverManager.getConnection(DBConst.CONN_STR);
-                 Statement stmt = conn.createStatement();
-                 ResultSet rs = stmt.executeQuery(sql)) {
+                    Statement stmt = conn.createStatement();
+                    ResultSet rs = stmt.executeQuery(sql)) {
                 while (rs.next()) {
-                    list.add(rs.getInt("dietitianId") + " - " + 
-                             rs.getString("firstName") + " " + rs.getString("lastName"));
+                    list.add(rs.getInt("dietitianId") + " - " +
+                            rs.getString("firstName") + " " + rs.getString("lastName"));
                 }
             }
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return list;
     }
 
     private String generateNextPlanId(Connection conn) throws SQLException {
         String sql = "SELECT MAX(VAL(planId)) FROM FitnessPlan";
         try (Statement stmt = conn.createStatement();
-             ResultSet rs = stmt.executeQuery(sql)) {
+                ResultSet rs = stmt.executeQuery(sql)) {
             if (rs.next()) {
                 int max = rs.getInt(1);
                 return String.valueOf(max + 1);
@@ -77,9 +189,10 @@ public class ManagerController {
         }
         return "1000";
     }
-    
+
     private java.sql.Date getCleanDate(java.util.Date date) {
-        if (date == null) return null;
+        if (date == null)
+            return null;
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
         cal.set(Calendar.HOUR_OF_DAY, 0);
@@ -89,75 +202,78 @@ public class ManagerController {
         return new java.sql.Date(cal.getTimeInMillis());
     }
 
-
     public boolean isTraineeExists(int id) {
         String sql = "SELECT COUNT(*) FROM Trainee WHERE traineeId = ?";
         try {
             Class.forName(DBConst.DB_DRIVER);
             try (Connection conn = DriverManager.getConnection(DBConst.CONN_STR);
-                 PreparedStatement ps = conn.prepareStatement(sql)) {
+                    PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setInt(1, id);
                 try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) return rs.getInt(1) > 0;
+                    if (rs.next())
+                        return rs.getInt(1) > 0;
                 }
             }
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return false;
     }
 
-    public boolean registerTrainee(int id, String fName, String lName, String email, 
-                                   String phone, java.sql.Date birthDate, String updateMethod, 
-                                   String fullPlanString, 
-                                   String dietaryRestrictions, String goals, int dietitianId) {
-        
+    public boolean registerTrainee(int id, String fName, String lName, String email,
+            String phone, java.sql.Date birthDate, int updateMethod,
+            int planId,
+            String dietaryRestrictions, String goals, int dietitianId) {
+
         if (isTraineeExists(id)) {
             return false;
         }
 
-        boolean isGroup = fullPlanString.toLowerCase().contains("group");
-        String existingPlanId = fullPlanString.split(" ")[0];
+        boolean isGroup = planId != PERSONAL_PLAN;
+        // String existingPlanId = fullPlanString.split(" ")[0];
         java.sql.Date cleanBirthDate = getCleanDate(birthDate);
-
+        int affected = -1;
         Connection conn = null;
         try {
             Class.forName(DBConst.DB_DRIVER);
             conn = DriverManager.getConnection(DBConst.CONN_STR);
-            conn.setAutoCommit(false); 
+            conn.setAutoCommit(true);
 
-            String sqlTrainee = "INSERT INTO TRAINEE (traineeId, firstName, lastName, email, phoneNumber, birthDat, preferredUpdateMethod) VALUES (?, ?, ?, ?, ?, ?, ?)";
+            String sqlTrainee = "INSERT INTO TRAINEE (traineeId, firstName, lastName, email, phone, birthDate, preferredUpdateMethodID) VALUES (?, ?, ?, ?, ?, ?, ?)";
             try (PreparedStatement ps = conn.prepareStatement(sqlTrainee)) {
                 ps.setInt(1, id);
                 ps.setString(2, fName);
                 ps.setString(3, lName);
                 ps.setString(4, email);
                 ps.setString(5, phone);
-                ps.setDate(6, cleanBirthDate); 
-                ps.setString(7, updateMethod); 
-                ps.executeUpdate();
+                ps.setDate(6, cleanBirthDate);
+                ps.setInt(7, updateMethod);
+                affected = ps.executeUpdate();
             }
 
             if (isGroup) {
-                String sqlGroup = "INSERT INTO GroupPlanMembers (planId, traineeId) VALUES (?, ?)";
+                String sqlGroup = "INSERT INTO GroupPlanTrainee (planId, traineeId) VALUES (?, ?)";
                 try (PreparedStatement psLink = conn.prepareStatement(sqlGroup)) {
-                    psLink.setString(1, existingPlanId);
+                    psLink.setInt(1, planId);
                     psLink.setInt(2, id);
                     psLink.executeUpdate();
+                    conn.commit();
                 }
             } else {
                 String newPlanId = generateNextPlanId(conn);
                 java.sql.Date cleanToday = getCleanDate(new java.util.Date());
-                
-                String sqlFitnessParent = "INSERT INTO FitnessPlan (planId, startDate, durationInWeeks, status, Type) VALUES (?, ?, ?, ?, ?)";
+
+                String sqlFitnessParent = "INSERT INTO FitnessPlan (planId, startDate, durationWeeks, statusID, PlanType) VALUES (?, ?, ?, ?, ?)";
                 try (PreparedStatement psParent = conn.prepareStatement(sqlFitnessParent)) {
                     psParent.setString(1, newPlanId);
-                    psParent.setDate(2, cleanToday); 
-                    psParent.setInt(3, 12); 
-                    psParent.setString(4, "Active");
+                    psParent.setDate(2, cleanToday);
+                    psParent.setInt(3, 12);
+                    psParent.setInt(4, 1); // Active status
                     psParent.setString(5, "Personal");
                     psParent.executeUpdate();
                 }
 
-                String sqlPersonal = "INSERT INTO PersonalPlan (planId, traineeId, dietaryRestrictions, individualGoals, dietitianId) VALUES (?, ?, ?, ?, ?)";
+                String sqlPersonal = "INSERT INTO PersonalFitnessPlan (planId, traineeId, dietaryRestrictions, individualGoals, dietitianId) VALUES (?, ?, ?, ?, ?)";
                 try (PreparedStatement psChild = conn.prepareStatement(sqlPersonal)) {
                     psChild.setString(1, newPlanId);
                     psChild.setInt(2, id);
@@ -168,87 +284,99 @@ public class ManagerController {
                 }
             }
 
-            conn.commit(); 
+            conn.commit();
             return true;
 
         } catch (Exception e) {
-            e.printStackTrace(); 
+            e.printStackTrace();
             if (conn != null) {
-                try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
             }
             return false;
         } finally {
             if (conn != null) {
-                try { conn.setAutoCommit(true); conn.close(); } catch (SQLException ex) { ex.printStackTrace(); }
+                try {
+                    conn.setAutoCommit(true);
+                    conn.close();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
             }
         }
     }
 
-    // --- שליפת רשימת כל המתאמנים לטבלה ---
     public List<Object[]> getAllTrainees() {
         List<Object[]> trainees = new ArrayList<>();
         String sql = "SELECT traineeId, firstName, lastName FROM Trainee ORDER BY firstName";
         try {
             Class.forName(DBConst.DB_DRIVER);
             try (Connection conn = DriverManager.getConnection(DBConst.CONN_STR);
-                 Statement stmt = conn.createStatement();
-                 ResultSet rs = stmt.executeQuery(sql)) {
+                    Statement stmt = conn.createStatement();
+                    ResultSet rs = stmt.executeQuery(sql)) {
                 while (rs.next()) {
-                    trainees.add(new Object[]{
-                        rs.getInt("traineeId"),
-                        rs.getString("firstName"),
-                        rs.getString("lastName")
+                    trainees.add(new Object[] {
+                            rs.getInt("traineeId"),
+                            rs.getString("firstName"),
+                            rs.getString("lastName")
                     });
                 }
             }
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return trainees;
     }
 
-    // --- שליפת פרטים מלאים של מתאמן ספציפי (כולל סטטוס פעילות isActive) ---
-    public Object[] getTraineeDetails(int traineeId) {
-        String sql = "SELECT firstName, lastName, email, phoneNumber, birthDat, preferredUpdateMethod, isActive FROM Trainee WHERE traineeId = ?";
+    public Trainee getTraineeDetails(int traineeId) {
+        String sql = "SELECT firstName, lastName, email, phone, birthDate, preferredUpdateMethodid, isActive FROM Trainee WHERE traineeId = ?";
+        Trainee trainee = null;
         try {
             Class.forName(DBConst.DB_DRIVER);
             try (Connection conn = DriverManager.getConnection(DBConst.CONN_STR);
-                 PreparedStatement ps = conn.prepareStatement(sql)) {
+                    PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setInt(1, traineeId);
                 try (ResultSet rs = ps.executeQuery()) {
                     if (rs.next()) {
-                        return new Object[]{
-                            rs.getString("firstName"), 
-                            rs.getString("lastName"),
-                            rs.getString("email"), 
-                            rs.getString("phoneNumber"),
-                            rs.getDate("birthDat"), 
-                            rs.getString("preferredUpdateMethod"),
-                            rs.getBoolean("isActive") // אינדקס 6
-                        };
+                        String firstName = rs.getString("firstName");
+                        String lastName = rs.getString("lastName");
+                        String email = rs.getString("email");
+                        String phone = rs.getString("phone");
+                        LocalDateTime birthDate = rs.getTimestamp("birthDate").toLocalDateTime();
+                        int updateMethod = rs.getInt("preferredUpdateMethodid");
+                        boolean isActive = rs.getBoolean("isActive");
+                        trainee = new Trainee(traineeId, firstName, lastName, birthDate, phone, email, updateMethod,
+                                isActive);
                     }
                 }
             }
-        } catch (Exception e) { e.printStackTrace(); }
-        return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return trainee;
     }
 
-    // --- עדכון פרטי מתאמן במסד (כולל סטטוס פעילות isActive) ---
-    public boolean updateTraineeDetails(int id, String fName, String lName, String email, String phone, java.sql.Date birthDate, String updateMethod, boolean isActive) {
+    public boolean updateTraineeDetails(int id, String fName, String lName, String email, String phone,
+            java.sql.Date birthDate, int updateMethod, boolean isActive) {
         java.sql.Date BirthDateMidnight = getCleanDate(birthDate);
-        String sql = "UPDATE Trainee SET firstName = ?, lastName = ?, email = ?, phoneNumber = ?, birthDat = ?, preferredUpdateMethod = ?, isActive = ? WHERE traineeId = ?";
-        
+        String sql = "UPDATE Trainee SET firstName = ?, lastName = ?, email = ?, phone = ?, birthDate = ?, preferredUpdateMethodId = ?, isActive = ? WHERE traineeId = ?";
+
         try {
             Class.forName(DBConst.DB_DRIVER);
             try (Connection conn = DriverManager.getConnection(DBConst.CONN_STR);
-                 PreparedStatement ps = conn.prepareStatement(sql)) {
-                ps.setString(1, fName); 
+                    PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setString(1, fName);
                 ps.setString(2, lName);
-                ps.setString(3, email); 
+                ps.setString(3, email);
                 ps.setString(4, phone);
-                ps.setDate(5, BirthDateMidnight); 
-                ps.setString(6, updateMethod);
-                ps.setBoolean(7, isActive); 
+                ps.setDate(5, BirthDateMidnight);
+                ps.setInt(6, updateMethod);
+                ps.setBoolean(7, isActive);
                 ps.setInt(8, id);
-                
+
                 return ps.executeUpdate() > 0;
             }
         } catch (Exception e) {
@@ -257,21 +385,23 @@ public class ManagerController {
         }
     }
 
-    // --- הוספה חדשה למנהל: בדיקה אם יש למתאמן שיעורים עתידיים פתוחים ---
     public boolean hasFutureRegistrations(int traineeId) {
         String sql = "SELECT COUNT(*) FROM ClassRegistration R " +
-                     "INNER JOIN TrainingClass C ON R.classID = C.classId " +
-                     "WHERE R.traineeId = ? AND C.startTime > NOW()";
+                "INNER JOIN TrainingClass C ON R.classID = C.classId " +
+                "WHERE R.traineeId = ? AND C.startTime > NOW()";
         try {
             Class.forName(DBConst.DB_DRIVER);
             try (Connection conn = DriverManager.getConnection(DBConst.CONN_STR);
-                 PreparedStatement ps = conn.prepareStatement(sql)) {
+                    PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setString(1, String.valueOf(traineeId)); // שימוש ב-String כמו במסד
                 try (ResultSet rs = ps.executeQuery()) {
-                    if (rs.next()) return rs.getInt(1) > 0;
+                    if (rs.next())
+                        return rs.getInt(1) > 0;
                 }
             }
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return false;
     }
 }

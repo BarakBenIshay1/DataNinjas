@@ -24,8 +24,8 @@ import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
-import com.fitwell.boundary.ManagerDashboardUI;
 import com.fitwell.boundary.UIBuilder;
+import com.fitwell.boundary.manager.ManagerDashboardUI;
 import com.fitwell.control.ManagerController;
 
 public class ManagerLoginUI extends JFrame {
