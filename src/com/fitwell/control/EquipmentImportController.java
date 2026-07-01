@@ -57,8 +57,6 @@ public class EquipmentImportController {
 
 	public ImportResult processMonthlyUpdates(Path jsonPath) {
 		int insertedTotal = 0;
-		int firstInsertedSerial = -1;
-		int lastInsertedSerial = -1;
 
 		try {
 			loadDriver();
@@ -101,7 +99,7 @@ public class EquipmentImportController {
 			e.printStackTrace();
 		}
 
-		return new ImportResult(insertedTotal, firstInsertedSerial, lastInsertedSerial);
+		return new ImportResult(insertedTotal);
 	}
 
 
@@ -176,20 +174,17 @@ public class EquipmentImportController {
 	
 	public static class ImportResult {
 		public final int totalInserted;
-		public final int firstSerial;
-		public final int lastSerial;
 
-		public ImportResult(int totalInserted, int firstSerial, int lastSerial) {
+
+		public ImportResult(int totalInserted) {
 			this.totalInserted = totalInserted;
-			this.firstSerial = firstSerial;
-			this.lastSerial = lastSerial;
 		}
 
 		@Override
 		public String toString() {
 			if (totalInserted <= 0)
 				return "No items added.";
-			return "Success! Added " + totalInserted + " items.\nSerials: " + firstSerial + " - " + lastSerial;
+			return "Success! Added " + totalInserted + " items.";
 		}
 	}
 	
