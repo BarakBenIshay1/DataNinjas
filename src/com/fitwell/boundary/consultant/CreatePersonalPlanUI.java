@@ -150,7 +150,6 @@ public class CreatePersonalPlanUI extends JDialog {
     }
 
     private void loadDietitians() {
-        cmbDietitian.addItem("0 - (None)");
         List<String> dietitians = PlanController.getInstance().getAllDietitiansForDropdown();
         dietitians.forEach(cmbDietitian::addItem);
     }
