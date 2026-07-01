@@ -1,6 +1,5 @@
 package com.fitwell.boundary.consultant;
 
-import com.fitwell.boundary.EquipmentSelectionDialog;
 import com.fitwell.boundary.TipSelectionDialog;
 import com.fitwell.control.TrainingClassController;
 import com.fitwell.control.TrainingClassController.ClassType;

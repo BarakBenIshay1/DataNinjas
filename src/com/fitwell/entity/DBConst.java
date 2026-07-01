@@ -10,8 +10,8 @@ public final class DBConst {
     
     public static final String DB_DRIVER = "net.ucanaccess.jdbc.UcanaccessDriver";
 
-    private static final String DB_NAME = "FitWellDB.accdb";
-    protected static final String DB_FILEPATH = getDBPath();
+    private static final String DB_NAME = "FitWell_EX3.accdb";
+    protected static final String DB_FILEPATH = "/Volumes/disk1_2/macbkp/"+DB_NAME;//getDBPath();
 
     public static final String CONN_STR =
             "jdbc:ucanaccess://" + DB_FILEPATH + ";COLUMNORDER=DISPLAY";
@@ -60,42 +60,42 @@ public final class DBConst {
 
     // ===== EquipmentItem SQL =====
     public static final String SQL_SEL_ITEM_FUNCTIONAL =
-            "SELECT isfunctional FROM EquipmentItem WHERE itemserialnumber = ?";
+            "SELECT isfunctional FROM EquipmentItem WHERE Serialnumber = ?";
 
     public static final String SQL_UPD_ITEM_FUNCTIONAL =
-            "UPDATE EquipmentItem SET isfunctional = ? WHERE itemserialnumber = ?";
+            "UPDATE EquipmentItem SET isfunctional = ? WHERE Serialnumber = ?";
 
     public static final String SQL_DEL_ITEM =
-            "DELETE FROM EquipmentItem WHERE itemserialnumber = ?";
+            "DELETE FROM EquipmentItem WHERE Serialnumber = ?";
 
     public static final String SQL_UPD_ITEM_NEEDS_REVIEW =
-            "UPDATE EquipmentItem SET needsReview = ? WHERE itemserialnumber = ?";
+            "UPDATE EquipmentItem SET needsReview = ? WHERE Serialnumber = ?";
 
     public static final String SQL_UPD_ITEM_LOCATION =
-            "UPDATE EquipmentItem SET x = ?, y = ?, shelfNumber = ? WHERE itemserialnumber = ?";
+            "UPDATE EquipmentItem SET locationX = ?, locationY = ?, shelfNumber = ? WHERE Serialnumber = ?";
 
     public static final String SQL_SEL_ITEMS_FOR_REVIEW =
-            "SELECT itemserialnumber, typeID, shelfNumber, x, y, needsReview, isfunctional " +
+            "SELECT Serialnumber, typeID, shelfNumber, locationX, locationY, needsReview, isfunctional " +
             "FROM EquipmentItem WHERE needsReview = TRUE " +
-            "ORDER BY itemserialnumber";
+            "ORDER BY Serialnumber";
 
     // ===== Import SQL (ONLY ADD) =====
     public static final String SQL_COUNT_ITEMS_BY_TYPE =
-            "SELECT COUNT(*) AS cnt FROM EquipmentItem WHERE typeID = ?";
+            "SELECT COUNT(*) AS cnt FROM EquipmentItem WHERE equipmentTypeID = ?";
 
     public static final String SQL_MAX_SERIAL =
-            "SELECT MAX(itemserialnumber) AS m FROM EquipmentItem";
+            "SELECT MAX(Serialnumber) AS m FROM EquipmentItem";
 
     public static final String SQL_INS_EQUIPMENT_ITEM =
-            "INSERT INTO EquipmentItem (itemserialnumber, typeID, shelfNumber, x, y, needsReview, isfunctional) " +
+            "INSERT INTO EquipmentItem (Serialnumber, equipmentTypeID, shelfNumber, locationX, locationY, needsReview, isfunctional) " +
             "VALUES (?, ?, ?, ?, ?, ?, ?)";
     
  // ===== EquipmentType SQL =====
     public static final String SQL_SEL_TYPE_EXISTS =
-            "SELECT COUNT(*) AS cnt FROM EquipmentType WHERE typeID = ?";
+            "SELECT COUNT(*) AS cnt FROM EquipmentType WHERE equipmentTypeID = ?";
 
     public static final String SQL_INS_EQUIPMENT_TYPE =
-            "INSERT INTO EquipmentType (typeID, name, category, description) VALUES (?, ?, ?, ?)";
+            "INSERT INTO EquipmentType (equipmentTypeID, name, category, description) VALUES (?, ?, ?, ?)";
 
  // ===== Usage Report (UR) SQL =====
 

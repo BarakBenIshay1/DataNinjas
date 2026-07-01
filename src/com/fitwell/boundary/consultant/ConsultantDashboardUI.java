@@ -113,7 +113,7 @@ public class ConsultantDashboardUI extends JFrame {
 
 		JPanel logoutWrapper = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		logoutWrapper.setOpaque(false);
-		logoutWrapper.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 15)); // קצת רווח מהכפתור חירום
+		logoutWrapper.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 15)); 
 		logoutWrapper.add(btnLogout);
 
 		bottomPanel.add(logoutWrapper, BorderLayout.WEST);
@@ -130,7 +130,7 @@ public class ConsultantDashboardUI extends JFrame {
 					options[0]);
 
 			if (choice == 0) {
-				ConsultantUI dlg = new ConsultantUI(this);
+				ManageStockUI dlg = new ManageStockUI(this);
 				dlg.setLocationRelativeTo(this);
 				dlg.setVisible(true);
 			} else if (choice == 1) {
