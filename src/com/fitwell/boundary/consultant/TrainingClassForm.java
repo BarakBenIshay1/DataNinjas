@@ -281,7 +281,7 @@ public class TrainingClassForm extends JFrame {
             JOptionPane.showMessageDialog(this, "Max participants must be a number", "Input Error",
                     JOptionPane.ERROR_MESSAGE);
         } catch (Exception ex) {
-            ex.printStackTrace(); // כדי שתראה שגיאות בקונסול
+            ex.printStackTrace(); 
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }

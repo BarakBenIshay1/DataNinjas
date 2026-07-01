@@ -21,6 +21,7 @@ import com.fitwell.entity.Tip;
 
 public class TrainingClassController {
 
+	public static final String CLASS_STATUS_ACTIVE = "Active";
 	private static TrainingClassController instance;
 	private Map<Integer, ClassType> classTypeMap;
 
@@ -38,7 +39,8 @@ public class TrainingClassController {
 	public List<ClassType> getClassTypeList() {
 		return new ArrayList<>(classTypeMap.values());
 	}
-	public ClassType getClassTypeById(int id){
+
+	public ClassType getClassTypeById(int id) {
 		return classTypeMap.get(id);
 	}
 
@@ -104,7 +106,7 @@ public class TrainingClassController {
 		if (!end.isAfter(start)) {
 			throw new IllegalArgumentException("End time must be after start time");
 		}
-		// === הפתרון לסעיף 2: חסימת יצירת שיעור בהתראה של פחות מ-24 שעות ===
+
 		if (start.isBefore(LocalDateTime.now().plusHours(24))) {
 			throw new IllegalArgumentException("Error: A class must be scheduled at least 24 hours.");
 		}
@@ -116,7 +118,6 @@ public class TrainingClassController {
 		if (!start.toLocalDate().equals(end.toLocalDate()))
 			throw new IllegalArgumentException("Training class must start and end on the same day");
 
-		// בדיקה שהתוכנית פעילה
 		if (!isPlanActive(planId)) {
 			throw new IllegalArgumentException("Error: You can only add classes to an 'Active' plan!");
 		}
@@ -133,8 +134,6 @@ public class TrainingClassController {
 			}
 		}
 
-		String newClassId = generateNextClassId();
-
 		String classSql = "INSERT INTO TrainingClass "
 				+ "(name, startDateTime, endDateTime, classTypeId, maxParticipants, planId, status) "
 				+ "VALUES (?, ?, ?, ?, ?, ?, ?)";
@@ -142,26 +141,31 @@ public class TrainingClassController {
 		try {
 			loadDriver();
 			try (Connection conn = DriverManager.getConnection(CONN_STR)) {
-
-				try (PreparedStatement ps = conn.prepareStatement(classSql)) {
+				int generatedClassId = -1;
+				try (PreparedStatement ps = conn.prepareStatement(classSql, Statement.RETURN_GENERATED_KEYS)) {
 					ps.setString(1, name.trim());
 					ps.setTimestamp(2, Timestamp.valueOf(start));
 					ps.setTimestamp(3, Timestamp.valueOf(end));
 					ps.setInt(4, type);
 					ps.setInt(5, maxParticipants);
 					ps.setInt(6, planId);
-					ps.setString(7, "Active");
+					ps.setString(7, CLASS_STATUS_ACTIVE);
 					ps.executeUpdate();
+					ResultSet rs = ps.getGeneratedKeys();
+					if (rs.next()) {
+						generatedClassId = rs.getInt(1);
+					}else{
+						throw new IllegalArgumentException("Error creating class with id " + generatedClassId);
+					}
 				}
 
 				if (selectedTips != null && !selectedTips.isEmpty()) {
-					String tipSql = "INSERT INTO Tip (tipID, classID, content, link) VALUES (?, ?, ?, ?)";
+					String tipSql = "INSERT INTO Tip ( classID, text, linkUrl) VALUES ( ?, ?, ?)";
 					try (PreparedStatement psTip = conn.prepareStatement(tipSql)) {
 						for (Tip tip : selectedTips) {
-							psTip.setString(1, generateTipId());
-							psTip.setString(2, newClassId);
-							psTip.setString(3, tip.getContent());
-							psTip.setString(4, "https://fitwell.com/tips");
+							psTip.setInt(1, generatedClassId);
+							psTip.setString(2, tip.getContent());
+							psTip.setString(3, "https://fitwell.com/tips");
 							psTip.executeUpdate();
 						}
 					}
@@ -171,7 +175,7 @@ public class TrainingClassController {
 					String eqSql = "INSERT INTO ClassEquipmentAssignment (classID, typeID, requestedQuantity) VALUES (?, ?, ?)";
 					try (PreparedStatement psEq = conn.prepareStatement(eqSql)) {
 						for (Map.Entry<Integer, Integer> entry : equipmentRequirements.entrySet()) {
-							psEq.setString(1, newClassId);
+							psEq.setInt(1, generatedClassId);
 							psEq.setInt(2, entry.getKey());
 							psEq.setInt(3, entry.getValue());
 							psEq.executeUpdate();
@@ -223,9 +227,7 @@ public class TrainingClassController {
 		}
 	}
 
-	// ==============================
-	// HELPER METHODS
-	// ==============================
+	// ***** HELPER METHODS ***** //
 
 	public List<EquipmentTypeView> getAllEquipmentTypes() {
 		List<EquipmentTypeView> types = new ArrayList<>();
@@ -240,21 +242,6 @@ public class TrainingClassController {
 			e.printStackTrace();
 		}
 		return types;
-	}
-
-	private String generateNextClassId() {
-		String sql = "SELECT MAX(VAL(classId)) FROM TrainingClass";
-		try (Connection conn = DriverManager.getConnection(CONN_STR);
-				Statement stmt = conn.createStatement();
-				ResultSet rs = stmt.executeQuery(sql)) {
-			if (rs.next()) {
-				int max = rs.getInt(1);
-				return String.valueOf(max + 1);
-			}
-		} catch (SQLException e) {
-			throw new RuntimeException("Failed to generate classId", e);
-		}
-		return "10010001";
 	}
 
 	private String generateTipId() {
@@ -377,30 +364,25 @@ public class TrainingClassController {
 		return emergencyTargetTime;
 	}
 
-	public List<Object[]> getAvailabilityReportForTime(LocalDateTime start, LocalDateTime end) {
-		List<Object[]> result = new ArrayList<>();
-
+	public List<EquipmentTypeView> getAvailabilityReportForTime(LocalDateTime start, LocalDateTime end) {
 		List<EquipmentTypeView> allTypes = getAllEquipmentTypes();
+		List<EquipmentTypeView> availableTypes = new ArrayList<EquipmentTypeView>();
 
 		for (EquipmentTypeView type : allTypes) {
-			int typeId = type.getEquipmentTypeID();
-			String name = type.getName();
-
-			int available = getAvailableQuantity(typeId, start, end);
+			int available = getAvailableQuantity(type.getEquipmentTypeID(), start, end);
 
 			if (available < 0)
 				available = 0;
-
-			result.add(new Object[] { typeId, name, available });
+			availableTypes.add(type);
 		}
-		return result;
+		return availableTypes;
 	}
 
 	private int getAvailableQuantity(int typeId, LocalDateTime start, LocalDateTime end) {
-		String sqlTotal = "SELECT COUNT(*) AS total FROM EquipmentItem WHERE typeID = ? AND isFunctional = TRUE";
+		String sqlTotal = "SELECT COUNT(*) AS total FROM EquipmentItem WHERE equipmentTypeID = ? AND isFunctional = TRUE";
 
 		String sqlUsed = "SELECT SUM(cea.requestedQuantity) AS usedQty " + "FROM ClassEquipmentAssignment cea "
-				+ "INNER JOIN TrainingClass tc ON cea.classID = tc.classId " + "WHERE cea.typeID = ? "
+				+ "INNER JOIN TrainingClass tc ON cea.classID = tc.classId " + "WHERE cea.equipmentTypeID = ? "
 				+ "AND tc.status <> 'Cancelled' " + "AND (tc.startDateTime < ? AND tc.endDateTime > ?)";
 
 		try (Connection conn = DriverManager.getConnection(DBConst.CONN_STR)) {
@@ -621,8 +603,8 @@ public class TrainingClassController {
 			int available = getAvailableQuantityExcludingClass(typeId, start, end, excludeClassId);
 			if (available < 0)
 				available = 0;
-			
-			result.add(new EquipmentTypeView( typeId, name, available ));
+
+			result.add(new EquipmentTypeView(typeId, name, available));
 		}
 		return result;
 	}
@@ -682,14 +664,20 @@ public class TrainingClassController {
 			return name;
 		}
 
+		@Override
 		public String toString() {
 			return name;
 		}
-		public boolean equals(Object obj){
-			if(!(obj instanceof ClassType))return false;
-			return this.classTypeId == ((ClassType)obj).classTypeId;
+
+		@Override
+		public boolean equals(Object obj) {
+			if (!(obj instanceof ClassType))
+				return false;
+			return this.classTypeId == ((ClassType) obj).classTypeId;
 		}
-		public int hashCode(){
+
+		@Override
+		public int hashCode() {
 			return this.classTypeId;
 		}
 	}
@@ -702,6 +690,7 @@ public class TrainingClassController {
 		public EquipmentTypeView(int equipmentTypeID, String name) {
 			this(equipmentTypeID, name, 0);
 		}
+
 		public EquipmentTypeView(int equipmentTypeID, String name, int available) {
 			this.equipmentTypeID = equipmentTypeID;
 			this.name = name;
@@ -719,7 +708,7 @@ public class TrainingClassController {
 		public int getAvailable() {
 			return available;
 		}
-		
+
 	}
 
 	public static class TrainingClassView {
