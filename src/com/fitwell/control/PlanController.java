@@ -140,8 +140,11 @@ public class PlanController {
                 int statusId = rs.getInt("statusId");
                 if (type == null)
                     type = "Unknown";
-
-                list.add(new PlanView(planId, type, planStatusMap.get(statusId).getName()));
+                String status = "N/A";
+                if(planStatusMap.containsKey(statusId)) {
+                	status =  planStatusMap.get(statusId).getName();
+                }
+                list.add(new PlanView(planId, type, status));
             }
         } catch (Exception e) {
             e.printStackTrace();
