@@ -1,18 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-21">
-		<attributes>
-			<attribute name="module" value="true"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.launching.macosx.MacOSXType/JRE [21.0.11]"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="lib/ucanaccess-5.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/hsqldb-2.5.0.jar"/>
-	<classpathentry kind="lib" path="lib/jackcess-3.0.1.jar"/>
-	<classpathentry kind="lib" path="lib/commons-lang3-3.8.1.jar"/>
-	<classpathentry kind="lib" path="lib/commons-logging-1.2.jar"/>
-	<classpathentry kind="lib" path="lib/flatlaf-3.7.1.jar"/>
-	<classpathentry kind="lib" path="lib/jasperreports-7.0.3.jar"/>
-	<classpathentry kind="lib" path="lib/commons-collections4-4.4.jar"/>
+	<classpathentry kind="lib" path="/Users/liortamir/Work/customers/barak-ben-ishay/workspace/DataNinjas/lib/gson-2.13.2.jar"/>
+	<classpathentry kind="lib" path="/Users/liortamir/Work/customers/barak-ben-ishay/workspace/DataNinjas/lib/ucanaccess-5.0.1.jar"/>
+	<classpathentry kind="lib" path="/Users/liortamir/Work/customers/barak-ben-ishay/workspace/DataNinjas/lib/hsqldb-2.5.0.jar"/>
+	<classpathentry kind="lib" path="/Users/liortamir/Work/customers/barak-ben-ishay/workspace/DataNinjas/lib/jackcess-3.0.1.jar"/>
+	<classpathentry kind="lib" path="/Users/liortamir/Work/customers/barak-ben-ishay/workspace/DataNinjas/lib/commons-lang3-3.8.1.jar"/>
+	<classpathentry kind="lib" path="/Users/liortamir/Work/customers/barak-ben-ishay/workspace/DataNinjas/lib/commons-logging-1.2.jar"/>
+	<classpathentry kind="lib" path="/Users/liortamir/Work/customers/barak-ben-ishay/workspace/DataNinjas/lib/flatlaf-3.7.1.jar"/>
+	<classpathentry kind="lib" path="/Users/liortamir/Work/customers/barak-ben-ishay/workspace/DataNinjas/lib/jasperreports-7.0.3.jar"/>
+	<classpathentry kind="lib" path="/Users/liortamir/Work/customers/barak-ben-ishay/workspace/DataNinjas/lib/commons-collections4-4.4.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
