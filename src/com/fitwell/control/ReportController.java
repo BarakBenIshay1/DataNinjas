@@ -100,7 +100,7 @@ public class ReportController {
                 while (rs.next()) {
                     reportData.add(new EquipmentReportItem(
                         rs.getString("name"),
-                        rs.getString("category"),
+                        rs.getString("categoryId"),
                         rs.getInt("usageCount")
                     ));
                 }
