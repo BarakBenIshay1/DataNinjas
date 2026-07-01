@@ -25,10 +25,10 @@ import javax.swing.SwingConstants;
 import javax.swing.Timer;
 import javax.swing.border.LineBorder;
 
-import com.fitwell.boundary.InventoryReportForm;
-import com.fitwell.boundary.ReportParametersForm;
 import com.fitwell.boundary.UIBuilder;
 import com.fitwell.boundary.login.RoleSelectionUI;
+import com.fitwell.boundary.reports.InventoryReportForm;
+import com.fitwell.boundary.reports.ReportParametersForm;
 import com.fitwell.control.AuthenticationController;
 import com.fitwell.control.TrainingClassController;
 
