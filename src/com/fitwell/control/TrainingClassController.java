@@ -607,7 +607,7 @@ public class TrainingClassController {
 		String sqlEnd = "UPDATE TrainingClass SET status = 'Completed' WHERE status IN ('InSession', 'Paused', 'Active') AND NOW() >= endDateTime";
 
 		try {
-			Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+			Class.forName(DBConst.DB_DRIVER);
 			try (Connection conn = DriverManager.getConnection(DBConst.CONN_STR);
 					java.sql.Statement st = conn.createStatement()) {
 				st.executeUpdate(sqlStart);

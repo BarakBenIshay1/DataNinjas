@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.fitwell.entity.DBConst;
 import com.fitwell.entity.TrainingClass;
 
 public class TraineePortalController {
@@ -70,7 +71,7 @@ public class TraineePortalController {
     public boolean traineeExists(String traineeId) {
         String sql = "SELECT COUNT(*) FROM Trainee WHERE traineeId = ?";
         try {
-            Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+            Class.forName(DBConst.DB_DRIVER);
             try (Connection conn = DriverManager.getConnection(CONN_STR);
                  PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setString(1, traineeId); 
@@ -85,7 +86,7 @@ public class TraineePortalController {
     public String getTraineeFullName(String traineeId) {
         String sql = "SELECT firstName, lastName FROM Trainee WHERE traineeID = ?";
         try {
-            Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+            Class.forName(DBConst.DB_DRIVER);
             try (Connection conn = DriverManager.getConnection(CONN_STR);
                  PreparedStatement ps = conn.prepareStatement(sql)) {
                 ps.setString(1, traineeId);
@@ -100,7 +101,7 @@ public class TraineePortalController {
 
     public boolean unsubscribeTrainee(String traineeId) {
         try {
-            Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+            Class.forName(DBConst.DB_DRIVER);
             try (Connection conn = DriverManager.getConnection(CONN_STR)) {
                 
                 String sqlDeactivate = "UPDATE Trainee SET isActive = FALSE WHERE traineeId = ?";
@@ -126,7 +127,7 @@ public class TraineePortalController {
 
     public void registerToClass(String traineeIdStr, int classId) {
         try {
-            Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+            Class.forName(DBConst.DB_DRIVER);
             try (Connection conn = DriverManager.getConnection(CONN_STR)) {
                 
                 if (isTraineeRegistered(classId, traineeIdStr, conn)) {
@@ -198,7 +199,7 @@ public class TraineePortalController {
     public void cancelRegistration(String traineeIdStr, int classId) {
         String deleteSql = "DELETE FROM ClassRegistration WHERE classID = ? AND traineeId = ?";
         try {
-            Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+            Class.forName(DBConst.DB_DRIVER);
             try (Connection conn = DriverManager.getConnection(CONN_STR)) {
                 int rows = 0;
                 try (PreparedStatement ps = conn.prepareStatement(deleteSql)) {
@@ -336,7 +337,7 @@ public class TraineePortalController {
                      "INNER JOIN TrainingClass C ON R.classID = C.classId " +
                      "WHERE R.traineeId = ? AND MONTH(C.startDateTime) = MONTH(NOW()) AND YEAR(C.startDateTime) = YEAR(NOW())";
         try {
-            Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+            Class.forName(DBConst.DB_DRIVER);
             try (Connection conn = DriverManager.getConnection(CONN_STR);
                  PreparedStatement ps = conn.prepareStatement(sql)) { // <--- התיקון הקטן נמצא ממש כאן (הוספנו conn.)
                 ps.setString(1, traineeIdStr);

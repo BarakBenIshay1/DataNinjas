@@ -25,7 +25,7 @@ public class EquipmentManagementController {
     }
 
     private void loadDriver() throws ClassNotFoundException {
-        Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+        Class.forName(DBConst.DB_DRIVER);
     }
 
     public Boolean getIsFunctional(int serialNumber) {
