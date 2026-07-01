@@ -1,20 +1,50 @@
 package com.fitwell.boundary.consultant;
 
-import com.fitwell.boundary.UIBuilder;
-import com.fitwell.control.PlanController;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GradientPaint;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.RenderingHints;
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.SpinnerDateModel;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
+
+import com.fitwell.boundary.UIBuilder;
+import com.fitwell.control.PlanController;
 
 public class CreatePersonalPlanUI extends JDialog {
 
     private JComboBox<String> cmbTrainee;
-    private JTextField txtStartDate;
+//    private JTextField txtStartDate;
+    private JSpinner startSpinner;
     private JSpinner spDuration;
     private JTextArea txtGoals;
     private JTextArea txtDietary;
@@ -68,10 +98,14 @@ public class CreatePersonalPlanUI extends JDialog {
 
         JPanel pnlStart = new JPanel(new BorderLayout());
         pnlStart.setOpaque(false);
-        pnlStart.add(createStyledLabel("Start Date (yyyy-MM-dd):"), BorderLayout.NORTH);
-        txtStartDate = createStyledTextField();
-        txtStartDate.setText(LocalDate.now().toString());
-        pnlStart.add(txtStartDate, BorderLayout.CENTER);
+        pnlStart.add(createStyledLabel("Start Date (ss/MM/yyyy):"), BorderLayout.NORTH);
+        
+        SpinnerDateModel model = new SpinnerDateModel();
+        startSpinner = new JSpinner(model);
+        JSpinner.DateEditor editor = new JSpinner.DateEditor(startSpinner, "dd/MM/yyyy");
+        startSpinner.setEditor(editor);
+
+        pnlStart.add(startSpinner, BorderLayout.CENTER);
 
         JPanel pnlDur = new JPanel(new BorderLayout());
         pnlDur.setOpaque(false);
@@ -164,7 +198,7 @@ public class CreatePersonalPlanUI extends JDialog {
             int traineeId = parseLeadingInt(cmbTrainee.getSelectedItem().toString());
             int dietitianId = parseLeadingInt(cmbDietitian.getSelectedItem().toString());
 
-            LocalDate ld = LocalDate.parse(txtStartDate.getText().trim());
+            LocalDate ld = convertToLocalDate(startSpinner);
             Date startDate = Date.valueOf(ld);
 
             int durationWeeks = (int) spDuration.getValue();
@@ -233,6 +267,14 @@ public class CreatePersonalPlanUI extends JDialog {
             .background(new Color(34, 139, 34)).foreground(Color.WHITE)
             .focus(false).border(BorderFactory.createEmptyBorder(12, 0, 12, 0))
             .cursor(new Cursor(Cursor.HAND_CURSOR)).build();
+    }
+    private LocalDate convertToLocalDate(JSpinner spinner) {
+    	Date date = (Date) spinner.getValue();
+
+    	LocalDate localDate = date.toInstant()
+    	        .atZone(ZoneId.systemDefault())
+    	        .toLocalDate();
+    	return localDate;
     }
 
     private static class AppBackgroundPanel extends JPanel {

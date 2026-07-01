@@ -67,7 +67,7 @@ public class ConsultantDashboardUI extends JFrame {
 		JButton btnAddClass = createCardButton("Add Class");
 		JButton btnEditClass = createCardButton("Edit Class");
 		JButton btnEquipment = createCardButton( "Inventory");
-		JButton btnPlans = createCardButton( "Training Plans");
+		JButton btnPlans = createCardButton("Plans");
 
 		JPanel topRow = new JPanel(new FlowLayout(FlowLayout.CENTER, 25, 10));
 		topRow.setOpaque(false);
