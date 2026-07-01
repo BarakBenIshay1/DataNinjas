@@ -49,7 +49,7 @@ public class ReportController {
 
         try (Connection conn = DriverManager.getConnection(CONN_STR)) {
 
-            InputStream jasperStream = getClass().getResourceAsStream("/com/fitwell/boundary/LowParticipationReport.jasper");
+            InputStream jasperStream = getClass().getResourceAsStream("/com/fitwell/boundary/reports/LowParticipationReport.jasper");
 
             if (jasperStream == null) {
                 throw new RuntimeException("LowParticipationReport.jasper not found in classpath (under boundary)");
