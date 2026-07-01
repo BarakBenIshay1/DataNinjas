@@ -1,4 +1,5 @@
-"monthlyUpdateDate": "2026-06-19",
+{
+	"monthlyUpdateDate": "2026-06-19",
 				  "equipment": [
 				    {
 				      "serialNumber":"BNCH6001",
@@ -20,9 +21,9 @@
 				    },
 				    {
 				      "serialNumber":"BOS15001",
-				      "typeId": 15,
+				      "equipmentTypeId": 15,
 				      "quantity": 10,
 				      "photoLinks": ["https://swiftfit.com/images/smithmachine.jpg"]
 				    }
 				  ]
-Ï
+}

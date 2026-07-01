@@ -6,7 +6,9 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import com.fitwell.entity.DBConst;
@@ -16,8 +18,10 @@ public class EquipmentImportController {
 	private static EquipmentImportController instance;
 
 	private final SwiftFitInterface swiftFit = new SwiftFitInterface();
+	private Map<Integer, EquipmentCategory> categoryMap;
 
 	private EquipmentImportController() {
+		categoryMap = new HashMap<>();
 	}
 
 	public static EquipmentImportController getInstance() {
@@ -27,46 +31,29 @@ public class EquipmentImportController {
 	}
 
 	private void loadDriver() throws ClassNotFoundException {
-		Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+		Class.forName(DBConst.DB_DRIVER);
+	}
+	
+	private void loadCategories() {
+		try {
+			loadDriver();
+			try (Connection conn = DriverManager.getConnection(DBConst.CONN_STR);
+					PreparedStatement ps = conn.prepareStatement("SELECT * FROM EquipmentCategory" )){
+					ResultSet rs = ps.executeQuery();
+					while(rs.next()) {
+						int equipmentCategoryId = rs.getInt(1);
+						String name = rs.getString(2);
+						EquipmentCategory ec = new EquipmentCategory(equipmentCategoryId, name);
+						categoryMap.put(equipmentCategoryId, ec);
+						
+					}
+			}
+		}catch(Exception ex) {
+			
+		}
 	}
 
-	public static class EquipmentImportData {
-		private String monthlyUpdateDate;
-		private List<EquipmentItem> equipment;
-
-		public String getMonthlyUpdateDate() {
-			return monthlyUpdateDate;
-		}
-
-		public List<EquipmentItem> getEquipment() {
-			return equipment;
-		}
-
-	}
-
-	public static class EquipmentItem {
-		private String serialNumber;
-		private int equipmentTypeId;
-		private int quantity;
-		private String photoLinks;
-
-		public String getSerialNumber() {
-			return serialNumber;
-		}
-
-		public int getEquipmentTypeId() {
-			return equipmentTypeId;
-		}
-
-		public int getQuantity() {
-			return quantity;
-		}
-
-		public String getPhotoLinks() {
-			return photoLinks;
-		}
-
-	}
+	
 
 	public ImportResult processMonthlyUpdates(Path jsonPath) {
 		int insertedTotal = 0;
@@ -117,26 +104,6 @@ public class EquipmentImportController {
 		return new ImportResult(insertedTotal, firstInsertedSerial, lastInsertedSerial);
 	}
 
-	// ---------- Result DTO ----------
-
-	public static class ImportResult {
-		public final int totalInserted;
-		public final int firstSerial;
-		public final int lastSerial;
-
-		public ImportResult(int totalInserted, int firstSerial, int lastSerial) {
-			this.totalInserted = totalInserted;
-			this.firstSerial = firstSerial;
-			this.lastSerial = lastSerial;
-		}
-
-		@Override
-		public String toString() {
-			if (totalInserted <= 0)
-				return "No items added.";
-			return "Success! Added " + totalInserted + " items.\nSerials: " + firstSerial + " - " + lastSerial;
-		}
-	}
 
 
 	private int getStartingShelf(Connection conn) throws SQLException {
@@ -184,14 +151,13 @@ public class EquipmentImportController {
 		}
 	}
 
-	// === התיקון הקריטי נמצא כאן ===
+
 	private void insertItem(Connection conn, String serial, int typeId, int shelf, int quantityE, int y,
 			boolean needsReview,
 			boolean isFunctional) throws SQLException {
 
-		// במקום להשתמש ב-Consts.SQL_INS_EQUIPMENT_ITEM שאולי הסדר שם הפוך,
-		// אנחנו כותבים את ה-SQL במפורש כאן כדי להיות בטוחים ב-100% בסדר הפרמטרים.
-		String sql = "INSERT INTO EquipmentItem (itemSerialNumber, typeID, shelfNumber, x, y, needsReview, isFunctional) VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+		String sql = "INSERT INTO EquipmentItem (SerialNumber, equipmentTypeID, shelfNumber, locationX, locationY, needsReview, isFunctional) VALUES (?, ?, ?, ?, ?, ?, ?)";
 
 		try (PreparedStatement ps = conn.prepareStatement(sql)) {
 			ps.setString(1, serial);
@@ -200,11 +166,85 @@ public class EquipmentImportController {
 			ps.setInt(4, quantityE);
 			ps.setInt(5, y);
 
-			// עכשיו זה בטוח הולך לעמודה הנכונה
 			ps.setBoolean(6, needsReview);
 			ps.setBoolean(7, isFunctional);
 
 			ps.executeUpdate();
 		}
+	}
+	
+	
+	public static class ImportResult {
+		public final int totalInserted;
+		public final int firstSerial;
+		public final int lastSerial;
+
+		public ImportResult(int totalInserted, int firstSerial, int lastSerial) {
+			this.totalInserted = totalInserted;
+			this.firstSerial = firstSerial;
+			this.lastSerial = lastSerial;
+		}
+
+		@Override
+		public String toString() {
+			if (totalInserted <= 0)
+				return "No items added.";
+			return "Success! Added " + totalInserted + " items.\nSerials: " + firstSerial + " - " + lastSerial;
+		}
+	}
+	
+	public static class EquipmentImportData {
+		private String monthlyUpdateDate;
+		private List<EquipmentItem> equipment;
+
+		public String getMonthlyUpdateDate() {
+			return monthlyUpdateDate;
+		}
+
+		public List<EquipmentItem> getEquipment() {
+			return equipment;
+		}
+
+	}
+
+	public static class EquipmentItem {
+		private String serialNumber;
+		private int equipmentTypeId;
+		private int quantity;
+		private String[] photoLinks;
+
+		public String getSerialNumber() {
+			return serialNumber;
+		}
+
+		public int getEquipmentTypeId() {
+			return equipmentTypeId;
+		}
+
+		public int getQuantity() {
+			return quantity;
+		}
+
+		public String[] getPhotoLinks() {
+			return photoLinks;
+		}
+
+	}
+	public class EquipmentCategory {
+
+		private final int equipmentCategoryId;
+		private final String name;
+		public EquipmentCategory(int equipmentCategoryId, String name) {
+			this.equipmentCategoryId = equipmentCategoryId;
+			this.name = name;
+		}
+		public int getEquipmentCategoryId() {
+			return equipmentCategoryId;
+		}
+
+		public String getName() {
+			return name;
+		}		
+		
 	}
 }

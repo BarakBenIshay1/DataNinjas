@@ -51,7 +51,7 @@ public class SwiftFitInterface {
 		Type type = new TypeToken<EquipmentImportData>() {
 		}.getType();
 
-		try (Reader reader = Files.newBufferedReader(Path.of("data/equipment_updates"))) {
+		try (Reader reader = Files.newBufferedReader(Path.of(FileHelper.getDataPath("equipment_updates.json")))) {
 			data = gson.fromJson(reader, type);
 		} catch (IOException e) {
 
