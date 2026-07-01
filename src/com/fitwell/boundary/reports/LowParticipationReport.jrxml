@@ -1,0 +1,122 @@
+<!-- Created with Jaspersoft Studio version 7.0.3.final using JasperReports Library version 7.0.3-41034ca841d452f3305ba55b9042260aaa1ab5dd  -->
+<jasperReport name="LowParticipationReport" language="java" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="875911e2-b42d-4374-bb76-1171789fa176">
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="FitWell_Access_DB"/>
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<parameter name="fromDate" class="java.sql.Date"/>
+	<parameter name="toDate" class="java.sql.Date"/>
+	<query language="sql"><![CDATA[SELECT
+    t.traineeId,
+    t.firstName,
+    t.lastName,
+    t.phoneNumber,
+    t.email,
+    COUNT(cr.classID) AS trainingCount
+FROM
+    (TRAINEE t
+     LEFT JOIN ClassRegistration cr
+        ON t.traineeId = cr.traineeId)
+     LEFT JOIN TrainingClass tc
+        ON cr.classID = tc.classID
+WHERE
+    tc.startTime BETWEEN $P{fromDate} AND $P{toDate}
+GROUP BY
+    t.traineeId,
+    t.firstName,
+    t.lastName,
+    t.phoneNumber,
+    t.email
+HAVING
+    COUNT(cr.classID) < 7
+ORDER BY
+    trainingCount ASC;
+]]></query>
+	<field name="TRAINEEID" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="TRAINEEID"/>
+		<property name="com.jaspersoft.studio.field.label" value="TRAINEEID"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="SYSTEM_SUBQUERY"/>
+	</field>
+	<field name="FIRSTNAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="FIRSTNAME"/>
+		<property name="com.jaspersoft.studio.field.label" value="FIRSTNAME"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="SYSTEM_SUBQUERY"/>
+	</field>
+	<field name="LASTNAME" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="LASTNAME"/>
+		<property name="com.jaspersoft.studio.field.label" value="LASTNAME"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="SYSTEM_SUBQUERY"/>
+	</field>
+	<field name="phoneNumber" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="phoneNumber"/>
+		<property name="com.jaspersoft.studio.field.label" value="phoneNumber"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="SYSTEM_SUBQUERY"/>
+	</field>
+	<field name="email" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="email"/>
+		<property name="com.jaspersoft.studio.field.label" value="email"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="SYSTEM_SUBQUERY"/>
+	</field>
+	<field name="trainingCount" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="TRAININGCOUNT"/>
+		<property name="com.jaspersoft.studio.field.label" value="trainingCount"/>
+	</field>
+	<background splitType="Stretch"/>
+	<title height="79" splitType="Stretch"/>
+	<pageHeader height="35" splitType="Stretch"/>
+	<columnHeader height="61" splitType="Stretch">
+		<element kind="staticText" uuid="718b104a-a838-489f-99e5-3361bdd6d408" x="-10" y="0" width="70" height="30">
+			<text><![CDATA[TRAINEEID]]></text>
+			<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="60053f09-3654-4ec7-bc44-a253d075b413"/>
+		</element>
+		<element kind="staticText" uuid="d3137b4d-a118-42f3-b058-81b2c91dfc15" x="80" y="0" width="70" height="30">
+			<text><![CDATA[FIRSTNAME]]></text>
+			<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="66db6f67-1cf9-4f2d-aeee-c7a6cdf90c61"/>
+		</element>
+		<element kind="staticText" uuid="8a4c38cb-7ef8-4836-ac8a-61b76b38df23" x="160" y="10" width="80" height="30">
+			<text><![CDATA[LASTNAME]]></text>
+			<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3eefd684-9ea1-4e1b-be58-c2b583681cfc"/>
+		</element>
+		<element kind="staticText" uuid="a23d4bfe-1f55-4885-98fe-0f2fa775c8f6" x="250" y="10" width="100" height="30">
+			<text><![CDATA[phoneNumber]]></text>
+			<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="b0816594-4161-4ea9-9774-f178331039f6"/>
+		</element>
+		<element kind="staticText" uuid="e0f10de4-c6dc-468f-91af-1ba857a04aa4" x="370" y="10" width="100" height="30">
+			<text><![CDATA[email]]></text>
+			<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ec0e21a9-5ace-4527-8008-81b0376df93e"/>
+		</element>
+		<element kind="staticText" uuid="28a1501f-adad-4140-8a39-ae8b4a75a81f" x="480" y="10" width="90" height="30">
+			<text><![CDATA[trainingCount]]></text>
+			<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="085d27d1-d4a8-4eee-89f2-d62b77f3f0b0"/>
+		</element>
+	</columnHeader>
+	<detail>
+		<band height="125" splitType="Stretch">
+			<element kind="textField" uuid="a9a91138-53f6-4c2c-9957-f0cf8e732c1e" x="-10" y="0" width="70" height="30">
+				<expression><![CDATA[$F{TRAINEEID}]]></expression>
+				<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="60053f09-3654-4ec7-bc44-a253d075b413"/>
+			</element>
+			<element kind="textField" uuid="c4c2a2aa-a50e-47cd-9b86-873944827e2f" x="70" y="0" width="80" height="30">
+				<expression><![CDATA[$F{FIRSTNAME}]]></expression>
+				<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="66db6f67-1cf9-4f2d-aeee-c7a6cdf90c61"/>
+			</element>
+			<element kind="textField" uuid="c0a66f27-3b9e-4441-8159-ecb5ede21958" x="160" y="0" width="90" height="30">
+				<expression><![CDATA[$F{LASTNAME}]]></expression>
+				<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="3eefd684-9ea1-4e1b-be58-c2b583681cfc"/>
+			</element>
+			<element kind="textField" uuid="fd8a8c21-54e9-4c20-b37b-0525829e7d45" x="250" y="0" width="110" height="30">
+				<expression><![CDATA[$F{phoneNumber}]]></expression>
+				<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="b0816594-4161-4ea9-9774-f178331039f6"/>
+			</element>
+			<element kind="textField" uuid="a2a4f1cf-3719-49fe-bac2-b63f55fd54ee" x="370" y="0" width="110" height="30">
+				<expression><![CDATA[$F{email}]]></expression>
+				<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ec0e21a9-5ace-4527-8008-81b0376df93e"/>
+			</element>
+			<element kind="textField" uuid="473d317e-222b-40cf-9050-a8ba5ead0046" x="480" y="0" width="90" height="30">
+				<expression><![CDATA[$F{trainingCount}]]></expression>
+				<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="085d27d1-d4a8-4eee-89f2-d62b77f3f0b0"/>
+			</element>
+		</band>
+	</detail>
+	<columnFooter height="45" splitType="Stretch"/>
+	<pageFooter height="54" splitType="Stretch"/>
+	<summary height="42" splitType="Stretch"/>
+</jasperReport>

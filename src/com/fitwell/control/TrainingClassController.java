@@ -244,13 +244,6 @@ public class TrainingClassController {
 		return types;
 	}
 
-	private String generateTipId() {
-		try {
-			Thread.sleep(10);
-		} catch (Exception e) {
-		}
-		return String.valueOf(System.currentTimeMillis() % 10000000);
-	}
 
 	public List<Tip> getAllTips() {
 		return List.of(new Tip("Warm up properly"), new Tip("Focus on breathing"), new Tip("Maintain correct posture"),

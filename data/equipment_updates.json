@@ -1,0 +1,28 @@
+"monthlyUpdateDate": "2026-06-19",
+				  "equipment": [
+				    {
+				      "serialNumber":"BNCH6001",
+				      "equipmentTypeId": 6,
+				      "quantity": 3,
+				      "photoLinks": ["https://swiftfit.com/images/dumbbells.jpg"]
+				    },
+				    {
+				      "serialNumber":"DMB8001",
+				      "equipmentTypeId": 8,
+				      "quantity": 6,
+				      "photoLinks": ["https://swiftfit.com/images/treadmill.jpg"]
+				    },
+				    {
+				      "serialNumber":"ROW3001",
+				      "equipmentTypeId": 3,
+				      "quantity": 5,
+				      "photoLinks": ["https://swiftfit.com/images/yogamat.jpg"]
+				    },
+				    {
+				      "serialNumber":"BOS15001",
+				      "typeId": 15,
+				      "quantity": 10,
+				      "photoLinks": ["https://swiftfit.com/images/smithmachine.jpg"]
+				    }
+				  ]
+Ï
