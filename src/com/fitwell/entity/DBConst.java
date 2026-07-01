@@ -11,7 +11,7 @@ public final class DBConst {
     public static final String DB_DRIVER = "net.ucanaccess.jdbc.UcanaccessDriver";
 
     private static final String DB_NAME = "FitWell_EX3.accdb";
-    protected static final String DB_FILEPATH = "/Volumes/disk1_2/macbkp/"+DB_NAME;//getDBPath();
+    protected static final String DB_FILEPATH = getDBPath();
 
     public static final String CONN_STR =
             "jdbc:ucanaccess://" + DB_FILEPATH + ";COLUMNORDER=DISPLAY";
