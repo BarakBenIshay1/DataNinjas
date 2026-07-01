@@ -145,7 +145,7 @@ public class EditTrainingClassForm extends JDialog {
         detailsPanel.add(pnlMax);
         mainPanel.add(detailsPanel, gbc);
 
-        // --- Edit Equipment Button ---
+        // Edit Equipment Button
         gbc.gridy++;
         gbc.insets = new Insets(15, 0, 5, 0);
         JButton btnEditEquipment = new JButton("🏋️ Edit Equipment");
@@ -169,7 +169,7 @@ public class EditTrainingClassForm extends JDialog {
         });
         mainPanel.add(btnEditEquipment, gbc);
 
-        // --- Action Buttons ---
+        // Action Buttons
         gbc.gridy++;
         gbc.insets = new Insets(20, 0, 0, 0);
         JPanel btnPanel = new JPanel(new GridLayout(1, 2, 15, 0));

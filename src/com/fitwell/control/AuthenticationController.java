@@ -44,7 +44,7 @@ public class AuthenticationController {
         return exists(sql,consultantId);
     }
     public String getConsultantFirstName(int consultantId) {
-        String sql = "SELECT Name FROM FitnessConsultant WHERE consultantID = ?";
+        String sql = "SELECT firstName FROM FitnessConsultant WHERE consultantID = ?";
         try (
             Connection conn = DriverManager.getConnection(DBConst.CONN_STR);
             PreparedStatement ps = conn.prepareStatement(sql)

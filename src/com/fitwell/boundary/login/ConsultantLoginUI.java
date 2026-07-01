@@ -27,8 +27,8 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
-import com.fitwell.boundary.ConsultantDashboardUI;
 import com.fitwell.boundary.UIBuilder;
+import com.fitwell.boundary.consultant.ConsultantDashboardUI;
 import com.fitwell.control.AuthenticationController;
 
 public class ConsultantLoginUI extends JFrame {

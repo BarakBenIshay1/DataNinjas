@@ -223,7 +223,7 @@ public class TraineePortalController {
         if ("Group".equalsIgnoreCase(planType)) {
             sql = "SELECT COUNT(*) FROM GroupPlanMembers WHERE planId = ? AND traineeId = ?";
         } else if ("Personal".equalsIgnoreCase(planType)) {
-            sql = "SELECT COUNT(*) FROM PersonalPlan WHERE planId = ? AND traineeId = ?";
+            sql = "SELECT COUNT(*) FROM PersonalFitnessPlan WHERE planId = ? AND traineeId = ?";
         } else {
             return false;
         }
