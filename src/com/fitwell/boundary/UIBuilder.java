@@ -191,6 +191,14 @@ public class UIBuilder {
 			btn.setFont(font);
 			return this;
 		}
+		public ButtonBuilder text(String text) {
+			btn.setText(text);
+			return this;
+		}
+		public ButtonBuilder enabled(boolean enabled) {
+			btn.setEnabled(enabled);
+			return this;
+		}
 
 		public ButtonBuilder background(Color color) {
 			btn.setBackground(color);

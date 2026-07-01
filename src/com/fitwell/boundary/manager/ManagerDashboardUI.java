@@ -1,18 +1,39 @@
 package com.fitwell.boundary.manager;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GradientPaint;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.RenderingHints;
+import java.util.Date;
+import java.util.List;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JSpinner;
+import javax.swing.JTextField;
+import javax.swing.SpinnerDateModel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
+
 import com.fitwell.boundary.EditTraineeListForm;
 import com.fitwell.boundary.UIBuilder;
-import com.fitwell.boundary.UIBuilder.LabelBuilder;
 import com.fitwell.boundary.login.RoleSelectionUI;
 import com.fitwell.control.ManagerController;
 import com.fitwell.control.ManagerController.PairData;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
-import java.awt.*;
-import java.util.Date;
-import java.util.List;
 
 public class ManagerDashboardUI extends JFrame {
 

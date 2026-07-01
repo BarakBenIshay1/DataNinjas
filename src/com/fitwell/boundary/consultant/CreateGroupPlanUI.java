@@ -33,7 +33,7 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.LineBorder;
 
-import com.fitwell.boundary.AddTraineesToNewGroupPlanForm;
+import com.fitwell.boundary.UIBuilder;
 import com.fitwell.control.PlanController;
 import com.fitwell.entity.Trainee;
 
@@ -46,13 +46,14 @@ public class CreateGroupPlanUI extends JDialog {
     private JTextField txtPreferredTypes;
     private JTextArea txtGuidelines;
 
-    // traineeId -> TraineeInfo (נבחרים מהדיאלוג החיצוני)
     private final Map<Integer, Trainee> selected = new LinkedHashMap<>();
+
+    private PlanController controller = PlanController.getInstance();
 
     public CreateGroupPlanUI(JFrame parent) {
         super(parent, "FitWell - Create Group Plan", true);
 
-        setSize(650, 850); // הגדלנו מעט כדי לתת מקום
+        setSize(650, 850);
         setLocationRelativeTo(parent);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
@@ -185,7 +186,6 @@ public class CreateGroupPlanUI extends JDialog {
         try {
             int minAge = (int) spMinAge.getValue();
             int maxAge = (int) spMaxAge.getValue();
-            // ✅ שואבים את הנתון מהמסך
             int durationInWeeks = (int) spDuration.getValue(); 
 
             if (minAge > maxAge) {
@@ -196,9 +196,7 @@ public class CreateGroupPlanUI extends JDialog {
             String preferred = txtPreferredTypes.getText().trim();
             String guidelines = txtGuidelines.getText().trim();
 
-            // ✅ מעבירים את הנתון לקונטרולר
-            String planId = PlanController.getInstance()
-                    .createGroupPlan(minAge, maxAge, preferred, guidelines, durationInWeeks);
+            int planId = controller.createGroupPlan(minAge, maxAge, preferred, guidelines, durationInWeeks);
 
             int added = 0;
             for (Integer traineeId : selected.keySet()) {
@@ -206,10 +204,10 @@ public class CreateGroupPlanUI extends JDialog {
                 if (ok) added++;
             }
 
+            String strAdded = (added > 0 ? ("\nTrainees added: " + added) : "");
             JOptionPane.showMessageDialog(
                     this,
-                    "Group Plan created! Plan ID: " + planId +
-                            (added > 0 ? ("\nTrainees added: " + added) : ""),
+                    "Group Plan created! Plan ID: " + planId +strAdded,
                     "Success",
                     JOptionPane.INFORMATION_MESSAGE
             );
@@ -259,28 +257,19 @@ public class CreateGroupPlanUI extends JDialog {
     }
 
     private JButton createSecondaryButton(String text) {
-        JButton btn = new JButton(text);
-        btn.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        btn.setBackground(new Color(230, 240, 255));
-        btn.setForeground(new Color(30, 55, 100));
-        btn.setFocusPainted(false);
-        btn.setBorder(BorderFactory.createLineBorder(new Color(180, 200, 230)));
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        JButton btn = UIBuilder.ButtonBuilder.of(text).font(new Font("Segoe UI", Font.PLAIN, 14))
+        .background(new Color(230, 240, 255)).foreground(new Color(30, 55, 100))
+        .focus(false).border(BorderFactory.createLineBorder(new Color(180, 200, 230)))
+        .cursor(new Cursor(Cursor.HAND_CURSOR)).build();
         return btn;
     }
 
     private void stylePrimaryButton(JButton btn) {
-        btn.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        btn.setBackground(new Color(34, 139, 34));
-        btn.setForeground(Color.WHITE);
-        btn.setFocusPainted(false);
-        btn.setBorder(BorderFactory.createEmptyBorder(12, 0, 12, 0));
-        btn.setCursor(new Cursor(Cursor.HAND_CURSOR));
-
-        btn.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) { btn.setBackground(new Color(40, 160, 40)); }
-            public void mouseExited(java.awt.event.MouseEvent evt) { btn.setBackground(new Color(34, 139, 34)); }
-        });
+        UIBuilder.ButtonBuilder.of(btn)
+        .font(new Font("Segoe UI", Font.BOLD, 16)).focus(false)
+        .background(new Color(34, 139, 34)).foreground(Color.WHITE)
+        .border(BorderFactory.createEmptyBorder(12, 0, 12, 0))
+        .cursor(new Cursor(Cursor.HAND_CURSOR)).build();
     }
 
     private static class AppBackgroundPanel extends JPanel {

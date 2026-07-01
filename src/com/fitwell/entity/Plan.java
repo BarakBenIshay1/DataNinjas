@@ -15,17 +15,17 @@ package com.fitwell.entity;
  * etc.), and general guidelines (as text).
  */
 public class Plan {
-	private String planId;
+	private int planId;
 	private String type;
 	private String status;
 
-	public Plan(String planId, String type, String status) {
+	public Plan(int planId, String type, String status) {
 		this.planId = planId;
 		this.type = type;
 		this.status = status;
 	}
 
-	public String getPlanId() {
+	public int getPlanId() {
 		return planId;
 	}
 

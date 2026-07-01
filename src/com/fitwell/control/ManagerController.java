@@ -235,9 +235,9 @@ public class ManagerController {
         }
 
         boolean isGroup = planId != PERSONAL_PLAN;
-        // String existingPlanId = fullPlanString.split(" ")[0];
+
         java.sql.Date cleanBirthDate = getCleanDate(birthDate);
-        int affected = -1;
+
         Connection conn = null;
         try {
             Class.forName(DBConst.DB_DRIVER);
@@ -253,7 +253,7 @@ public class ManagerController {
                 ps.setString(5, phone);
                 ps.setDate(6, cleanBirthDate);
                 ps.setInt(7, updateMethod);
-                affected = ps.executeUpdate();
+                ps.executeUpdate();
             }
 
             if (isGroup) {

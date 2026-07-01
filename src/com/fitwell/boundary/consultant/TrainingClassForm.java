@@ -39,18 +39,15 @@ public class TrainingClassForm extends JFrame {
 
     public TrainingClassForm() {
         super("FitWell - Schedule New Class");
-        setSize(550, 720); // גובה מותאם לתוכן
+        setSize(550, 720);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 
-        // אתחול המפה
         equipmentMap = new HashMap<>();
 
-        // רקע כללי
         setContentPane(new AppBackgroundPanel());
         setLayout(new GridBagLayout());
 
-        // === הפאנל הלבן המעוצב ===
         JPanel mainPanel = new JPanel();
         mainPanel.setBackground(Color.WHITE);
         mainPanel.setLayout(new GridBagLayout());
@@ -65,7 +62,6 @@ public class TrainingClassForm extends JFrame {
         gbc.gridy = 0;
         gbc.weightx = 1.0;
 
-        // --- כותרת ---
         JLabel lblTitle = new JLabel("Schedule New Class");
         lblTitle.setFont(new Font("Segoe UI", Font.BOLD, 24));
         lblTitle.setForeground(new Color(30, 55, 100));
@@ -80,7 +76,6 @@ public class TrainingClassForm extends JFrame {
         nameField = createStyledTextField();
         mainPanel.add(nameField, gbc);
 
-        // --- Dates (שורה אחת לשני תאריכים) ---
         gbc.gridy++;
         JPanel datePanel = new JPanel(new GridLayout(1, 2, 15, 0));
         datePanel.setOpaque(false);
@@ -177,14 +172,10 @@ public class TrainingClassForm extends JFrame {
 
         add(mainPanel);
 
-        // ===== חיבור המאזינים (הלוגיקה המקורית שלך) =====
         setupListeners();
     }
 
-    // FIXME delete
-    // ==========================================
-    // LOGIC METHODS (הקוד שלך)
-    // ==========================================
+
 
     private void setupListeners() {
         rbGroup.addActionListener(e -> loadGroupPlans());
@@ -195,7 +186,6 @@ public class TrainingClassForm extends JFrame {
         createBtn.addActionListener(e -> createClass());
     }
 
-    // TODO use Plan class class to String
     private void loadGroupPlans() {
         planBox.removeAllItems();
         List<PlanItem> plans = controller.getAllGroupPlanIds();
@@ -203,7 +193,6 @@ public class TrainingClassForm extends JFrame {
             plans.forEach(planBox::addItem);
     }
 
-    // TODO use Plan class class to String
     private void loadPersonalPlans() {
         planBox.removeAllItems();
         List<PlanItem> plans = controller.getAllPersonalPlanIds();
@@ -212,15 +201,11 @@ public class TrainingClassForm extends JFrame {
     }
 
     private void openTipDialog() {
-        // שחזור הלוגיקה המקורית שלך:
-        // 1. שליפת כל הטיפים מהקונטרולר
         List<Tip> allTips = TrainingClassController.getInstance().getAllTips();
 
-        // 2. פתיחת הדיאלוג
         TipSelectionDialog dlg = new TipSelectionDialog(this, allTips);
         dlg.setVisible(true);
 
-        // 3. שמירת הטיפים שנבחרו
         this.selectedTips = dlg.getSelectedTips();
 
         // פידבק ויזואלי בכפתור (כמו שעשינו לציוד)
@@ -285,9 +270,6 @@ public class TrainingClassForm extends JFrame {
         }
     }
 
-    // ==========================================
-    // UI HELPER METHODS (עיצוב)
-    // ==========================================
 
     private JSpinner createDateTimeSpinner() {
         SpinnerDateModel model = new SpinnerDateModel(new Date(), null, null, java.util.Calendar.MINUTE);
@@ -295,7 +277,6 @@ public class TrainingClassForm extends JFrame {
         JSpinner.DateEditor editor = new JSpinner.DateEditor(spinner, "dd/MM/yyyy HH:mm");
         spinner.setEditor(editor);
 
-        // עיצוב ה-Spinner
         JComponent editorComponent = spinner.getEditor();
         if (editorComponent instanceof JSpinner.DefaultEditor) {
             ((JSpinner.DefaultEditor) editorComponent).getTextField().setBorder(
